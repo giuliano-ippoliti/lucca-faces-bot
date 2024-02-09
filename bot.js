@@ -1,22 +1,43 @@
 (function() {
-    
+
+	function waitForElm(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                observer.disconnect();
+                resolve(document.querySelector(selector));
+            }
+        });
+
+        // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
   function initHashNames() {
 	  const hashTable = {}; //possible d'alimenter manuellement ici
-	  
+
 	  return hashTable;
   }
-  
+
   function manageGame() {
-	
+
 	setTimeout(function() {
 		var btns = document.getElementsByTagName('button');
 
 		for (let i = 0; i < btns.length; i++) {
 		  if (btns[i].textContent === 'Rejouer') {
 			var boutonTrouve = btns[i];
-			
+
 			boutonTrouve.click();
-			
+
 			setTimeout(function() {
 				var divElement = document.querySelector('.rotation-loader');
 				//console.log('divElement: ' + divElement);
@@ -25,7 +46,7 @@
 					divElement.click();
 				}
 			}, 3000);
-			
+
 			break;
 		  }
 		}
@@ -42,11 +63,11 @@
 
       if (xhr.responseURL.includes('next')) {
 	    var rep = JSON.parse(xhr.response);
-		
+
 		suggestions = rep.suggestions;
-		
-		var fullURL = 'https://xxxxxxx.ilucca.net' + rep.imageUrl;
-		
+
+		var fullURL = 'https://ateme.ilucca.net' + rep.imageUrl;
+
 		fetch(fullURL)
 		  .then(response => {
 			if (response.ok) {
@@ -58,15 +79,18 @@
 		  })
 		  .then(imageBlob => {
 			blobSize = imageBlob.size; // Obtenir la taille du blob
-			
-			setTimeout(function() {
+
+			setTimeout(async function() {
+				buttons = await waitForElm('.answer');
 				buttons = document.querySelectorAll('.answer');
 
-				buttons = Array.from(buttons);
+				// buttons = Array.from(buttons);
+
+				// console.log(buttons);
 
 				if (blobSize in HashNames) {
 					for (const correctName in HashNames[blobSize]) {
-						
+
 						var found = -1;
 						for (let i = 0; i <= 3; i++) {
 							var txtButton = buttons[i].textContent.toLowerCase();
@@ -83,7 +107,7 @@
 						}
 					}
 				}
-				else {			
+				else {
 					// click d'office sur le 1er
 					buttons[0].click();
 					manageGame();
@@ -93,14 +117,14 @@
 		  .catch(error => {
 			console.log("Une erreur s'est produite : " + error.message);
 		  });
-			
+
       }
 	  else if (xhr.responseURL.includes('guess')) {
 		var rep = JSON.parse(xhr.response);
 		correctSuggestionId = rep.correctSuggestionId;
 		var score =  rep.score;
 		console.log(score);
-		
+
 		for (let i = 0; i <= 3; i++) {
 			if (suggestions[i].id == correctSuggestionId) {
 
@@ -126,7 +150,7 @@
 
   const HashNames = initHashNames();
   console.log(HashNames);
-  
+
   var blobSize;
   var buttons;
   var suggestions;
