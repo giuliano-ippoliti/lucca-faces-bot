@@ -66,7 +66,7 @@
 
 		suggestions = rep.suggestions;
 
-		var fullURL = 'https://ateme.ilucca.net' + rep.imageUrl;
+		var fullURL = 'https://xxxxx.ilucca.net' + rep.imageUrl;
 
 		fetch(fullURL)
 		  .then(response => {
